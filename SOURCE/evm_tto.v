@@ -245,7 +245,7 @@ always @(*) begin
                 (vote_candidate_1_flag || vote_candidate_2_flag || vote_candidate_3_flag))
                 next_state = CANDIDATE_VOTED;
             else if (timer_counter >= TIMER_MAX)
-                next_state = IDLE; // TIMER TIMEOUT ADDED
+                next_state = WAITING_FOR_CANDIDATE; // TIMER TIMEOUT ADDED
         end
 
         CANDIDATE_VOTED: begin
@@ -267,3 +267,4 @@ always @(*) begin
 end
 
 endmodule
+
