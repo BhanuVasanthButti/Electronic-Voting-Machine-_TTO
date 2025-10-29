@@ -61,29 +61,34 @@ always @(posedge clk or negedge rst) begin
         current_state <= next_state;
 
         //---------------------------------------------
-        // TIMER UPDATE LOGIC
-        //---------------------------------------------
-        case (current_state)
-            WAITING_FOR_CANDIDATE: begin
-                if (candidate_ready)
-                    timer_counter <= 6'd0; // reset on valid input
-                else if (timer_counter < TIMER_MAX)
-                    timer_counter <= timer_counter + 1'b1;
-                else
-                    timer_counter <= TIMER_MAX; // hold max
-            end
+// TIMER UPDATE LOGIC (fixed version)
+//---------------------------------------------
+case (current_state)
+    WAITING_FOR_CANDIDATE: begin
+        if (candidate_ready)
+            timer_counter <= 7'd0; // reset on valid input
+        else if (next_state != WAITING_FOR_CANDIDATE)
+            timer_counter <= 7'd0; // reset when leaving this state
+        else if (timer_counter < TIMER_MAX)
+            timer_counter <= timer_counter + 1'b1;
+        else
+            timer_counter <= TIMER_MAX; // hold max
+    end
 
-            WAITING_FOR_CANDIDATE_TO_VOTE: begin
-                if (vote_candidate_1 || vote_candidate_2 || vote_candidate_3)
-                    timer_counter <= 6'd0; // reset on valid vote
-                else if (timer_counter < TIMER_MAX)
-                    timer_counter <= timer_counter + 1'b1;
-                else
-                    timer_counter <= TIMER_MAX;
-            end
+    WAITING_FOR_CANDIDATE_TO_VOTE: begin
+        if (vote_candidate_1 || vote_candidate_2 || vote_candidate_3)
+            timer_counter <= 7'd0; // reset on valid vote
+        else if (next_state != WAITING_FOR_CANDIDATE_TO_VOTE)
+            timer_counter <= 7'd0; // reset when leaving this state
+        else if (timer_counter < TIMER_MAX)
+            timer_counter <= timer_counter + 1'b1;
+        else
+            timer_counter <= TIMER_MAX;
+    end
 
-            default: timer_counter <= 6'd0; // reset timer in other states
-        endcase
+    default: timer_counter <= 7'd0; // reset in other states
+endcase
+
 
         //---------------------------------------------
         // EXISTING VOTING LOGIC (unchanged)
@@ -267,4 +272,3 @@ always @(*) begin
 end
 
 endmodule
-
